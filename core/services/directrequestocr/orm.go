@@ -17,6 +17,10 @@ type ORM interface {
 	SetError(id int64, runID int64, errorType ErrType, computationError string, readyAt time.Time) error
 	SetConfirmed(contractRequestID [32]byte) error
 
+	FindOldestEntriesByState(state RequestState, limit uint32) ([]Request, error)
+
+	// TODO add jobID param / contract address?
+
 	// TODO additional operations will be needed by the Reporting Plugin
 	// https://app.shortcut.com/chainlinklabs/story/54054/ocr-plugin-for-directrequest-ocr
 
@@ -69,6 +73,7 @@ func (o *inmemoryorm) SetResult(id int64, runID int64, computationResult []byte,
 		val.RunID = runID
 		val.ErrorType = NONE
 		val.Result = computationResult
+		val.State = RESULT_READY
 		val.ResultReadyAt = readyAt
 		o.db[id] = val
 		return nil
@@ -83,6 +88,7 @@ func (o *inmemoryorm) SetError(id int64, runID int64, errorType ErrType, computa
 		val.RunID = runID
 		val.ErrorType = errorType
 		val.Error = computationError
+		val.State = RESULT_READY
 		val.ResultReadyAt = readyAt
 		o.db[id] = val
 		return nil
@@ -102,6 +108,17 @@ func (o *inmemoryorm) SetConfirmed(contractRequestID [32]byte) error {
 		return fmt.Errorf("can't find entry with dbid: %v", dbid)
 	}
 	return fmt.Errorf("can't find entry with id: %v", contractRequestID)
+}
+
+func (o *inmemoryorm) FindOldestEntriesByState(state RequestState, limit uint32) ([]Request, error) {
+	var ret []Request
+	// todo: oldest and limit
+	for _, val := range o.db {
+		if val.State == state {
+			ret = append(ret, val)
+		}
+	}
+	return ret, nil
 }
 
 // TODO actual DB: https://app.shortcut.com/chainlinklabs/story/54049/database-table-in-core-node

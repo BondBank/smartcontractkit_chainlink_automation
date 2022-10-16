@@ -5,11 +5,12 @@ import "../interfaces/OCR2DRClientInterface.sol";
 import "../interfaces/OCR2DROracleInterface.sol";
 import "../AuthorizedReceiver.sol";
 import "../../ConfirmedOwner.sol";
+import "../ocr2/OCR2Base.sol";
 
 /**
  * @title OCR2DR oracle contract
  */
-contract OCR2DROracle is OCR2DROracleInterface, AuthorizedReceiver, ConfirmedOwner {
+contract OCR2DROracle is OCR2DROracleInterface, OCR2Base, AuthorizedReceiver {
   event OracleRequest(bytes32 requestId, bytes data);
   event OracleResponse(bytes32 requestId);
 
@@ -24,11 +25,13 @@ contract OCR2DROracle is OCR2DROracleInterface, AuthorizedReceiver, ConfirmedOwn
 
   uint256 private constant MINIMUM_CONSUMER_GAS_LIMIT = 400000;
 
+  uint40 public lastEpochAndRound;
+  bytes public lastReport;
   bytes32 private s_donPublicKey;
   uint256 private s_nonce;
   mapping(bytes32 => Commitment) private s_commitments;
 
-  constructor(address owner, bytes32 donPublicKey) ConfirmedOwner(owner) {
+  constructor(address owner, bytes32 donPublicKey) OCR2Base(true) {
     s_donPublicKey = donPublicKey;
   }
 
@@ -36,7 +39,7 @@ contract OCR2DROracle is OCR2DROracleInterface, AuthorizedReceiver, ConfirmedOwn
    * @notice The type and version of this contract
    * @return Type and version string
    */
-  function typeAndVersion() external pure virtual returns (string memory) {
+  function typeAndVersion() external pure virtual override returns (string memory) {
     return "OCR2DROracle 0.0.0";
   }
 
@@ -81,5 +84,24 @@ contract OCR2DROracle is OCR2DROracleInterface, AuthorizedReceiver, ConfirmedOwn
 
   function _canSetAuthorizedSenders() internal view override returns (bool) {
     return isAuthorizedSender(msg.sender) || owner() == msg.sender;
+  }
+
+  // From OCR2Base
+  function _report(
+    bytes32 configDigest,
+    uint40 epochAndRound,
+    bytes memory report
+  ) internal override {
+    lastReport = report;
+    lastEpochAndRound = epochAndRound;
+  }
+
+  function _beforeSetConfig(uint8 _f, bytes memory _onchainConfig) internal override {
+  }
+
+  function _afterSetConfig(uint8 _f, bytes memory _onchainConfig) internal override {
+  }
+
+  function _payTransmitter(uint32 initialGas, address transmitter) internal override {
   }
 }

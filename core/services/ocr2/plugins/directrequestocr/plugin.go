@@ -59,8 +59,11 @@ func NewDROracle(jb job.Job, pipelineRunner pipeline.Runner, jobORM job.ORM, ocr
 }
 
 func (o *DROracle) GetPluginFactory() (ocr2types.ReportingPluginFactory, error) {
-	// TODO OCR reporting plugin: https://app.shortcut.com/chainlinklabs/story/54054/ocr-plugin-for-directrequest-ocr
-	return nil, nil
+	return DirectRequestReportingPluginFactory{
+		Logger:    o.ocrLogger,
+		PluginORM: o.pluginORM,
+		JobID:     o.jb.ExternalJobID,
+	}, nil
 }
 
 func (o *DROracle) GetServices() ([]job.ServiceCtx, error) {

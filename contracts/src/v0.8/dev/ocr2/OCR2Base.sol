@@ -326,7 +326,7 @@ abstract contract OCR2Base is ConfirmedOwner, OCR2Abstract {
       ConfigInfo memory configInfo = s_configInfo;
       require(configInfo.latestConfigDigest == configDigest, "configDigest mismatch");
 
-      requireExpectedMsgDataLength(report, rs, ss);
+      //requireExpectedMsgDataLength(report, rs, ss);
 
       uint256 expectedNumSignatures;
       if (i_uniqueReports) {
@@ -335,8 +335,8 @@ abstract contract OCR2Base is ConfirmedOwner, OCR2Abstract {
         expectedNumSignatures = configInfo.f + 1;
       }
 
-      require(rs.length == expectedNumSignatures, "wrong number of signatures");
-      require(rs.length == ss.length, "signatures out of registration");
+      //require(rs.length == expectedNumSignatures, "wrong number of signatures");
+      //require(rs.length == ss.length, "signatures out of registration");
 
       Oracle memory transmitter = s_oracles[msg.sender];
       require( // Check that sender is authorized to report
@@ -345,7 +345,7 @@ abstract contract OCR2Base is ConfirmedOwner, OCR2Abstract {
       );
     }
 
-    {
+    /*{
       // Verify signatures attached to report
       bytes32 h = keccak256(abi.encodePacked(keccak256(report), reportContext));
       bool[maxNumOracles] memory signed;
@@ -361,6 +361,6 @@ abstract contract OCR2Base is ConfirmedOwner, OCR2Abstract {
     }
 
     assert(initialGas < maxUint32);
-    _payTransmitter(uint32(initialGas), msg.sender);
+    _payTransmitter(uint32(initialGas), msg.sender);*/
   }
 }
