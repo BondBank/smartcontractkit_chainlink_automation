@@ -81,3 +81,7 @@ func (o *DROracle) GetServices() ([]job.ServiceCtx, error) {
 	services = append(services, logListener)
 	return services, nil
 }
+
+func (o *DROracle) Name() string {
+	return "DirectRequestPlugin"
+}
